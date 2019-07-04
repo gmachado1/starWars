@@ -7,7 +7,11 @@ import javax.persistence.EntityManager;
 import br.com.gustavo.starWars.exceptions.DAOException;
 import br.com.gustavo.starWars.exceptions.ErrorCode;
 import br.com.gustavo.starWars.model.domain.Planet;
-
+/**
+ * Class not been use. it was used when it was using MYSQL
+ * @author gustavo
+ *
+ */
 public class PlanetDao {
 	public Planet save(Planet p) {
 		EntityManager em = JPAUtil.getEntityManager();
@@ -75,7 +79,7 @@ public class PlanetDao {
 		EntityManager em = JPAUtil.getEntityManager();
 		Planet planetManaged = null;
 
-		if (p.getId() <= 0) {
+		if (p.get_Id() <= 0) {
 			throw new DAOException("O id precisa ser maior do que 0.", ErrorCode.BAD_REQUEST.getCode());
 		}
 		if (!planetIsValid(p)) {
@@ -84,7 +88,7 @@ public class PlanetDao {
 
 		try {
 			em.getTransaction().begin();
-			planetManaged = em.find(Planet.class, p.getId());
+			planetManaged = em.find(Planet.class, p.get_Id());
 			planetManaged.setName(p.getName());
 			planetManaged.setTerrain(p.getTerrain());
 			planetManaged.setClimate(p.getClimate());

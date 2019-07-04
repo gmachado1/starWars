@@ -2,15 +2,15 @@ package br.com.gustavo.starWars.model.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity(name = "Planets")
 public class Planet {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private int _id;
 	private String name;
 	private String terrain;
 	private String climate;
@@ -18,21 +18,22 @@ public class Planet {
 	public Planet() {
 
 	}
+	
 
-	public Planet(int id, String name, String terrain, String climate) {
+	public Planet(int _id, String name, String terrain, String climate) {
 		super();
-		this.id = id;
+		this._id = _id;
 		this.name = name;
 		this.terrain = terrain;
 		this.climate = climate;
 	}
 
-	public int getId() {
-		return id;
+	public int get_Id() {
+		return _id;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void set_Id(int _id) {
+		this._id = _id;
 	}
 
 	public String getName() {
@@ -61,7 +62,7 @@ public class Planet {
 
 	@Override
 	public String toString() {
-		return "Planet [id=" + id + ", name=" + name + ", terrain=" + terrain + ", climate=" + climate + "]";
+		return "Planet [_id=" + _id + ", name=" + name + ", terrain=" + terrain + ", climate=" + climate + "]";
 	}
 
 }

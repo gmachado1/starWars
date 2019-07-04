@@ -1,6 +1,8 @@
 package br.com.gustavo.starWars.resources;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.Consumes;
@@ -34,7 +36,9 @@ public class PlanetResource {
 	@GET
 	public List<Planet> list(@QueryParam("name") String name) {
 		if (name != null) {
-			return service.getPlanetByName(name);
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("name", name);
+			return service.getPlanetByName(map);
 		}
 		return service.list();
 	}
@@ -43,7 +47,9 @@ public class PlanetResource {
 	@Path("/{id}")
 	public Planet getById(@PathParam("id") int id) {
 		Planet p = null;
-		p = service.getById(id);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("_id", id);
+		p = service.getById(map);
 		return p;
 	}
 
@@ -53,7 +59,7 @@ public class PlanetResource {
 		try {
 			System.out.println(p);
 			p = service.save(p);
-			msg = "Planet added! id of the planet:" + p.getId();
+			msg = "Planet added! id of the planet:" + p.get_Id();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println(msg);
@@ -64,13 +70,14 @@ public class PlanetResource {
 
 	@PUT
 	@Path("/{id}")
-	public void update(Planet p, @PathParam("id") int id) {
+	public void update(Planet newPlanet, @PathParam("id") int id) {
 		String msg = "Error on changing planet!";
-		p.setId(id);
 		try {
-
-			service.update(p);
-			System.out.println(p);
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("_id", id);
+			Planet oldPlanet = service.getById(map); 
+			service.update(oldPlanet,newPlanet);
+			System.out.println(newPlanet);
 			msg = "Planet changed!";
 			System.out.println(msg);
 		} catch (Exception e) {
@@ -85,7 +92,11 @@ public class PlanetResource {
 	public void remove(@PathParam("id") int id) {
 		String msg = "Error on removing planet!";
 		try {
-			service.remove(id);
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("_id", id);
+			Planet p = service.getById(map);
+			p.set_Id(id);
+			service.remove(p);
 			msg = "Planet removed! Bye bye...";
 			System.out.println(msg);
 		} catch (Exception e) {
