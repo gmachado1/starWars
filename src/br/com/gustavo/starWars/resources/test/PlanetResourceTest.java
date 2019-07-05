@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.FixMethodOrder;
 import org.junit.jupiter.api.AfterAll;
@@ -17,11 +19,13 @@ import org.junit.runners.MethodSorters;
 import br.com.gustavo.starWars.exceptions.DAOException;
 import br.com.gustavo.starWars.model.dao.PlanetDAO;
 import br.com.gustavo.starWars.model.domain.Planet;
+import br.com.gustavo.starWars.service.PlanetService;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class PlanetResourceTest {
 
 	static PlanetDAO planetDao = new PlanetDAO();
+	static PlanetService service = new PlanetService();
 	static List<Planet> planets = new ArrayList<Planet>();
 
 	static int invalidId;
@@ -72,20 +76,21 @@ public class PlanetResourceTest {
 	/**
 	 * Testing if save method
 	 */
-	@RepeatedTest(5)
+	@RepeatedTest(2)
 	void testA() {
 		// testASavePlanets() {
 		planets = planetDao.findPlanets();
 				
 		int size = planets.size();
-		int id = planets.lastIndexOf(planets) + 1;
+		int id = planets.get(size-1).get_Id()+1;
 
 		Planet p = new Planet();
+		p.set_Id(id);
 		p.setName((id % 2 == 0) ? "planet" + id : "moon" + id);
 		p.setTerrain((id % 2 == 0) ? "soil" + id : id + "soil");
 		p.setClimate((id % 2 == 0) ? "habitável" + id : id + "inabitável");
 
-		invalidId = planetDao.save(p).get_Id() + 1; // used on Test: testEIdNotExist(testE)
+		invalidId = planetDao.save(p).get_Id()+1; // used on Test: testEIdNotExist(testE)
 
 		int newSize = planetDao.findPlanets().size();
 
@@ -93,19 +98,23 @@ public class PlanetResourceTest {
 	}
 
 	/**
-	 * Test method get
+	 * Test method getID exist
 	 */
 	@Test
 	void testB() {
 		// testBIdExist() {
-	/*	Planet aux = planetDao.findPlanets().get(0);
-		Planet p = planetDao.findPlanet(mapKeyValue) getById(aux.get_Id());
+		Planet aux = planetDao.findPlanets().get(0);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("_id", aux.get_Id());
+		
+		Planet p = service.getById(map);
+				
 		assertEquals(true, planetDao.planetIsValid(p));
 	}
 
 	/**
 	 * Test if name lenght is been tested
-	 /
+	 */
 	@Test
 	void testC() {
 		// testCInvalidPlanet() {
@@ -116,107 +125,114 @@ public class PlanetResourceTest {
 		p.setClimate("123");
 		DAOException expect = assertThrows(DAOException.class, () -> planetDao.save(p));
 		assertEquals(400, expect.getCode());// error name field
-		expect = assertThrows(DAOException.class, () -> planetDao.update(p));
+		
+		Planet oldPlanet = planetDao.findPlanets().get(0);
+		Planet newPlanet = new Planet();
+		newPlanet.setName("");// empty name
+		newPlanet.setTerrain("1234");
+		newPlanet.setClimate("123");
+		expect = assertThrows(DAOException.class, () -> planetDao.update(oldPlanet, newPlanet));
 		assertEquals(400, expect.getCode());// error name field
 
-		p.setName("Plutão");
-		p.setTerrain("12");
-		p.setClimate("wheather");
+		newPlanet.setName("Plutão");
+		newPlanet.setTerrain("12");
+		newPlanet.setClimate("wheather");
 		expect = assertThrows(DAOException.class, () -> planetDao.save(p));
 		assertEquals(400, expect.getCode());// error Terrain field
-		expect = assertThrows(DAOException.class, () -> planetDao.update(p));
+		expect = assertThrows(DAOException.class, () -> planetDao.update(oldPlanet,newPlanet));
 		assertEquals(400, expect.getCode());// error Terrain field
 
-		p.setName("Plutão");
-		p.setTerrain("123");
-		p.setClimate("1");
+		newPlanet.setName("Plutão");
+		newPlanet.setTerrain("123");
+		newPlanet.setClimate("1");
 		expect = assertThrows(DAOException.class, () -> planetDao.save(p));
 		assertEquals(400, expect.getCode());// error climate field
-		expect = assertThrows(DAOException.class, () -> planetDao.update(p));
+		expect = assertThrows(DAOException.class, () -> planetDao.update(oldPlanet,newPlanet));
 		assertEquals(400, expect.getCode());// error climate field
 
 	}
 
 	/**
 	 * Testing if id is less then zero
-	 /
+	 */
 	@Test
 	void testD() {
 		// testDIdLessThenZero() {
-		DAOException expect = assertThrows(DAOException.class, () -> planetDao.getById(-1));
+		Planet aux = planetDao.findPlanets().get(0);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("_id", -1);
+		
+		DAOException expect = assertThrows(DAOException.class, () -> service.getById(map));
 		assertEquals(400, expect.getCode());
 
+		
+		
+		
 		Planet p = new Planet();
 		p.set_Id(-1);
-		expect = assertThrows(DAOException.class, () -> planetDao.getById(p.get_Id()));
+		expect = assertThrows(DAOException.class, () -> service.getById(map));
 		assertEquals(400, expect.getCode());
 
-		expect = assertThrows(DAOException.class, () -> planetDao.remove(p.get_Id()));
+		expect = assertThrows(DAOException.class, () -> service.remove(p));
 		assertEquals(400, expect.getCode());
 
-		expect = assertThrows(DAOException.class, () -> planetDao.update(p));
+		expect = assertThrows(DAOException.class, () -> planetDao.update(aux,p));
 		assertEquals(400, expect.getCode());
 	}
 
 	/**
 	 * Test if id does not exist
-	 /
+	 */
 	@Test
 	void testE() {
 		// testEIdNotExist() {
 		assertEquals(true, invalidId > 0);
-		DAOException expect = assertThrows(DAOException.class, () -> planetDao.getById(invalidId));
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("_id", invalidId);
+		DAOException expect = assertThrows(DAOException.class, () -> planetDao.findPlanetById(map));
 		assertEquals(404, expect.getCode());
 
 		Planet p = new Planet();
 		p.set_Id(invalidId);
-		p.setName("AnyName");
-		p.setTerrain("123");
-		p.setClimate("wheather");
-		expect = assertThrows(DAOException.class, () -> planetDao.update(p));
-		assertEquals(404, expect.getCode());
-
-		expect = assertThrows(DAOException.class, () -> planetDao.remove(invalidId));
+		expect = assertThrows(DAOException.class, () -> service.remove(p));
 		assertEquals(404, expect.getCode());
 
 	}
 
 	/**
 	 * Test ifplanet is been found
-	 /
+	 */
 	@Test
 	void testF() {
 		// testFFindPlanetByName() {
-		Planet p = planetDao.list().get(0);
+		Planet p = planetDao.findPlanets().get(0);
 
 		assertEquals(true, planetDao.planetIsValid(p));
-		int ifExist = planetDao.getByName(p.getName()).size();
-		assertEquals(true, ifExist > 0);
 
-		DAOException expect = assertThrows(DAOException.class, () -> planetDao.getByName("zzzz"));
-		assertEquals(404, expect.getCode());
-		// CAUTION: It may have a planet with the name "zzzz". If you got error here,
-		// look on your database.
 	}
 
 	/**
 	 * Test remove Planet
-	 /
-	@RepeatedTest(5)
+	 */
+	@RepeatedTest(3)
 	void testG() {
 		// testGRemovePlanets() {
-		planets = planetDao.list();
+		planets = planetDao.findPlanets();
 		int size = planets.size();
-
+		if (size==0) {
+			Planet p = new Planet(8, "Naboo", "grassy hills, swamps, forests, mountains", "temperate");
+			service.save(p);
+			size = planets.size();
+		}
 		assertEquals(true, size > 0);
 
 		Planet p = planets.get(size - 1);
-		planetDao.remove(p.get_Id());
+		service.remove(p);
 
-		planets = planetDao.list();
+		planets = planetDao.findPlanets();
 		int newSize = planets.size();
 
 		assertEquals(--size, newSize);
 	}
-*/}
+
 }

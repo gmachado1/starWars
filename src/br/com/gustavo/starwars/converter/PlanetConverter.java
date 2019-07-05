@@ -6,7 +6,11 @@ import java.util.Map;
 import com.mongodb.DBObject;
 
 import br.com.gustavo.starWars.model.domain.Planet;
-
+/**
+ * Class used to convert atributes for mongo use. 
+ * @author gustavo
+ *
+ */
 public class PlanetConverter {
 
 	public Map<String, Object> converterToMap(Planet planet) {
