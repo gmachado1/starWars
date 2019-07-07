@@ -162,7 +162,7 @@ public class PlanetResourceTest {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("_id", -1);
 		
-		DAOException expect = assertThrows(DAOException.class, () -> service.getById(map));
+		DAOException expect = assertThrows(DAOException.class, () -> planetDao.findPlanet(map));
 		assertEquals(400, expect.getCode());
 
 		
@@ -194,8 +194,8 @@ public class PlanetResourceTest {
 
 		Planet p = new Planet();
 		p.set_Id(invalidId);
-		expect = assertThrows(DAOException.class, () -> service.remove(p));
-		assertEquals(404, expect.getCode());
+		expect = assertThrows(DAOException.class, () -> planetDao.delete(p));
+		assertEquals(400, expect.getCode());
 
 	}
 

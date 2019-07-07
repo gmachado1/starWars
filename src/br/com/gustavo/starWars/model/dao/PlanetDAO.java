@@ -76,13 +76,25 @@ public class PlanetDAO extends EntityDao<Planet> {
 	}
 
 	public void delete(Planet planet) {
+		
+		if (!planetIsValid(planet)) {
+			
+			throw new DAOException("Planeta com dados incompletos.", ErrorCode.BAD_REQUEST.getCode());
+		}
+		
 		Map<String, Object> map = new PlanetConverter().converterToMap(planet);
 
+		
 		delete(map);
 	}
 
 	public Planet findPlanet(Map<String, Object> mapKeyValue) {
 
+		int id = (Integer) mapKeyValue.get("_id");
+		if (id < 0) {
+			throw new DAOException("Planeta com dados incompletos.", ErrorCode.BAD_REQUEST.getCode());
+		}
+		
 		DBObject dbObject = findOne(mapKeyValue);
 
 		Planet planet = new PlanetConverter().converterToPlanet(dbObject);
@@ -98,6 +110,10 @@ public class PlanetDAO extends EntityDao<Planet> {
 		}
 
 		DBObject dbObject = findOne(mapKeyValue);
+		
+		if (dbObject == null) {
+			throw new DAOException("Planeta inexistente.", ErrorCode.NOT_FOUND.getCode());
+		}
 
 		Planet planet = new PlanetConverter().converterToPlanet(dbObject);
 
